@@ -1,19 +1,22 @@
 """
-This listening script conducts a twitter API query every hour and sends a summary email with a CSV attachment with all relevent tweets from a 24 hour period
+This listening script conducts a twitter API query repeatedly at desired intervals and sends a summary email with a CSV attachment with unique relevent tweets after a desired time
+v1.1
+Jan 2, 2023
 """
 
 import tweepy
 import time
+import csv
 
 def riptide():
 #Create an API client
     client = tweepy.Client(
-        consumer_key="consumer_key",
-        consumer_secret="consumer_secret",
-        access_token="access_token",
-        access_token_secret="access_token_secret")
+        consumer_key="consumer_key_here",
+        consumer_secret="consumer_secret_here",
+        access_token="access_token_here",
+        access_token_secret="access_token_secret_here")
     # Set the search term
-    SEARCH_TERM = 'Enter search terms here'
+    SEARCH_TERM = 'Set search term here using twitter search syntax'
     # Set the number of tweets to return
     MAX_TWEETS = 100
     # Search for tweets containing the search term
@@ -23,6 +26,8 @@ def riptide():
 #Parse results from API
     #Convert results into string
     results_string = str(results)
+    #Remove trailing metadata from string
+    results_string = results_string[:-191]
     # Split string into list
     split_results = results_string.split(">, ")
     # iterate over the list of strings
@@ -37,26 +42,60 @@ def riptide():
         split_results[i] = split_results[i].replace("Response(data=[", "")
     # delete "text=" from the string
         split_results[i] = split_results[i].replace("text=", "")
-    #seperate the list with blank lines
-        split_results_sep = '\n''\n'.join(split_results)
-    # Print tweets from list
-    for item in split_results:
-        print(item + '\n' + '\n')
 
 #Dedup results and write to a CSV
     # Open a new file in write mode if first run
     if count == 0:
         with open("output.csv", "w") as f:
+            # Create a CSV writer object
+            writer = csv.writer(f)
             # Write the output to the file
             for item in split_results:
-                f.write(item + '\n')
-        #Remove duplicates and write to new file
+                #Split tweet URL from tweet text
+                part1 = str(item[:49])
+                part2 = str(item[49:])
+                writer.writerow([part1, part2])
+        # Create a set to store the unique values in the second column
+        seen = set()
         with open('output.csv', 'r') as in_file, open('master.csv', 'w') as out_file:
-            seen = set() # set for fast O(1) amortized lookup
-            for line in in_file:
-                if line in seen: continue # skip duplicate
-                seen.add(line)
-                out_file.write(line)
+            # Create a CSV reader object
+            reader = csv.reader(in_file)
+            # Create a CSV writer object
+            writer = csv.writer(out_file)
+            # Iterate over the rows in the output CSV file
+            for row in reader:
+                # Skip rows with a duplicate value in the second column
+                if row[1] in seen:
+                    continue
+                seen.add(row[1])
+                # Write the row to the master CSV file
+                writer.writerow(row)
+    # Open a new file in append mode if not first run
+    elif count != 0:
+        with open("output.csv", "a") as f:
+            # Create a CSV writer object
+            writer = csv.writer(f)
+            # Write the output to the file
+            for item in split_results:
+                #Split tweet URL from tweet text
+                part1 = str(item[:49])
+                part2 = str(item[49:])
+                writer.writerow([part1, part2])
+        # Create a set to store the unique values in the second column
+        seen = set()
+        with open('output.csv', 'r') as in_file, open('master.csv', 'a') as out_file:
+            # Create a CSV reader object
+            reader = csv.reader(in_file)
+            # Create a CSV writer object
+            writer = csv.writer(out_file)
+            # Iterate over the rows in the output CSV file
+            for row in reader:
+                # Skip rows with a duplicate value in the second column
+                if row[1] in seen:
+                    continue
+                seen.add(row[1])
+                # Write the row to the master CSV file
+                writer.writerow(row)
         #Remove duplicates in master file
         with open('master.csv', 'r') as in_file, open('riptide.csv', 'w') as out_file:
             seen = set() # set for fast O(1) amortized lookup
@@ -65,26 +104,26 @@ def riptide():
                 seen.add(line)
                 out_file.write(line)
 
-    # Open a new file in append mode if not first run
-    elif count != 0:
-        with open("output.csv", "a") as f:
-            # Write the output to the file
-            for item in split_results:
-                f.write(item + '\n')
-        #Remove duplicates and append to new file
-        with open('output.csv', 'r') as in_file, open('master.csv', 'a') as out_file:
-            seen = set() # set for fast O(1) amortized lookup
-            for line in in_file:
-                if line in seen: continue # skip duplicate
-                seen.add(line)
-                out_file.write(line)
-        #Remove duplicates in master file
-        with open('master.csv', 'r') as in_file, open('riptide.csv', 'w') as out_file:
-            seen = set() # set for fast O(1) amortized lookup
-            for line in in_file:
-                if line in seen: continue # skip duplicate
-                seen.add(line)
-                out_file.write(line)
+    # Create an empty list to store the deduped tweets
+    data = []
+    # Open the CSV file for reading
+    with open('riptide.csv', 'r') as csvfile:
+        # Create a CSV reader object
+        reader = csv.reader(csvfile)
+        # Iterate over the rows in the CSV file
+        for row in reader:
+            # Add the row to the data list
+            data.append(row)
+    final_tweets = data
+
+    #Seperate items and print to console
+    final_tweets_flat = []
+    for item in final_tweets:
+        final_tweets_flat.extend(item)
+        print(item)
+        print()
+    #Create seperated list to print to email body
+    final_tweets_sep_modified = '\n'.join([tweet if i % 2 == 0 else tweet + '\n' for i, tweet in enumerate(final_tweets_flat)])
 
 #Config email send
     def riptide_send():
@@ -101,14 +140,14 @@ def riptide():
         from email.mime.text import MIMEText
         port = 587  # For starttls
         smtp_server = "smtp.gmail.com"
-        sender_email = "sender@sender.com"
-        receiver_email = "receiver@receiver.com"
-        password = "password"
+        sender_email = "email here"
+        receiver_email = "email here"
+        password = "password here"
         message = MIMEMultipart()
-        message["Subject"] = f"Riptide Output {d2}"
+        message["Subject"] = f"Listening Script Output {d2}"
         message["From"] = sender_email
         message["To"] = receiver_email
-        body = MIMEText(f"Email sent by Python.\nRiptide listening script developed by Southwest Impact\nintel@southwestimpact.com \n \n {split_results_sep}")
+        body = MIMEText(f"Email sent by Python.\nRiptide listening script developed by Southwest Impact LLC \n intel@southwestimpact.com \n \n {final_tweets_sep_modified}")
 
         # Create the attachment
         attachment = MIMEApplication(open("riptide.csv", "rb").read())
@@ -133,13 +172,16 @@ def riptide():
             server.sendmail(sender_email, receiver_email, message)
 
     #If end of day, send email
-    if count == 24:
+    #Set count to number of times for script to run (default is 3)
+    if count == 3:
         riptide_send()
 
 #Driver code
 count = 0
-while count <= 24:
+#Set count to number of times for script to run (default is 3)
+while count <= 3:
     riptide()
     count +=1
+    #Set sleep time in seconds to period between script runs (default is 1 hour i.e. 3600 seconds)
     time.sleep(3600)
 
