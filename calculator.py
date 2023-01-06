@@ -19,7 +19,10 @@ logo = """
 |_____________________|
 """
 
+#Main calc program
 def calculator():
+    
+    #Getting initial conditions at startup
     def intro():
         print(logo)
         print()
@@ -31,7 +34,8 @@ def calculator():
         operation = input("Pick an operation: ")
         second_num = float(input("What's the next number?: "))
         compute(operation,first_num,second_num)
-
+    
+    #Creating arithmetic functions
     def add(first_num,second_num):
         solution = float(first_num + second_num)
         return solution
@@ -44,7 +48,8 @@ def calculator():
     def divide(first_num,second_num):
         solution = float(first_num / second_num)
         return solution
-
+    
+    #Execute arithmetic functions
     def compute(operation,first_num,second_num):
         if operation == "+":
             output = add(first_num,second_num)
@@ -59,6 +64,7 @@ def calculator():
             output = divide(first_num,second_num)
             closing(output,first_num,second_num,operation)
 
+    #Create subsequent loops if desired
     def subsequent(output):
         print("+")
         print("-")
@@ -69,6 +75,7 @@ def calculator():
         first_num = output
         compute(operation,first_num,second_num)
 
+    #Output and decide if follow-on calculation
     def closing(output,first_num,second_num,operation):
         print(f"{first_num} {operation} {second_num} = {output}")
         next = input(f"Type 'y' to continue calculating with {output}, or type 'n' to start a new calculation: ")
@@ -76,12 +83,9 @@ def calculator():
             subsequent(output)
         if next == "n":
             calculator()
-
+          
+    #Start-up driver
     intro()
 
+#Global driver
 calculator()
-
-
-
-
-
