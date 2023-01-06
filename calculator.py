@@ -31,6 +31,9 @@ def calculator():
         print("-")
         print("*")
         print("/")
+        print("%")
+        print("//")
+        print("**")
         operation = input("Pick an operation: ")
         second_num = float(input("What's the next number?: "))
         compute(operation,first_num,second_num)
@@ -48,6 +51,19 @@ def calculator():
     def divide(first_num,second_num):
         solution = float(first_num / second_num)
         return solution
+    def modulo(first_num,second_num):
+        solution = float(first_num % second_num)
+        return solution
+    def floor_division(first_num,second_num):
+        solution = float(first_num // second_num)
+        return solution
+    def floor_division(first_num,second_num):
+        solution = float(first_num // second_num)
+        return solution
+    def exponent(first_num,second_num):
+        solution = float(first_num ** second_num)
+        return solution
+    
     
     #Execute arithmetic functions
     def compute(operation,first_num,second_num):
@@ -63,6 +79,15 @@ def calculator():
         if operation == "/":
             output = divide(first_num,second_num)
             closing(output,first_num,second_num,operation)
+        if operation == "%":
+            output = modulo(first_num,second_num)
+            closing(output,first_num,second_num,operation)
+        if operation == "//":
+            output = floor_division(first_num,second_num)
+            closing(output,first_num,second_num,operation)
+        if operation == "**":
+            output = exponent(first_num,second_num)
+            closing(output,first_num,second_num,operation)
 
     #Create subsequent loops if desired
     def subsequent(output):
@@ -70,6 +95,9 @@ def calculator():
         print("-")
         print("*")
         print("/")
+        print("%")
+        print("//")
+        print("**")
         operation = input("Pick an operation: ")
         second_num = float(input("What's the next number?: "))
         first_num = output
