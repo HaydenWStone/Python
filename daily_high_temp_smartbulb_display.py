@@ -131,8 +131,8 @@ def change_bulb(hsv):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(colorswitch(hsv,20))
 
-    #Keep light on for four hours
-    time.sleep(4*60*60)
+    #Keep light on for 3:30
+    time.sleep(3.5*60*60)
 
     #Turn off bulb
     loop = asyncio.new_event_loop()
@@ -144,8 +144,8 @@ get_max_temp(0)
 hsv = get_color()
 change_bulb(hsv)
 
-#Wait 4 hours
-time.sleep(4*60*60)
+#Wait 3:30
+time.sleep(3.5*60*60)
 
 #Get max temp for tomorrow, convert to color, and send to bulb in PM
 get_max_temp(1)
