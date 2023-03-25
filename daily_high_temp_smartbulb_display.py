@@ -7,12 +7,11 @@ import kasa
 import time
 import asyncio
 
-
 ###GET TEMP AND COLOR##
 
 #Params here
-API_KEY = "OWM API Key Here"
-OWM_Endpoint = "https://api.openweathermap.org/data/2.5/weather"
+API_KEY = "API key here"
+OWM_Endpoint = "https://api.openweathermap.org/data/3.0/onecall"
 LAT = "38.9072"
 LON = "-77.0369"
 
@@ -34,22 +33,22 @@ colors = {
     "VV_DARK_BLUE": (237, 67.1, 58.4)
 }
 
-#API call params
+#Open Weather Map API call params
 weather_params = {
     "lat":LAT,
     "lon":LON,
     "appid":API_KEY
 }
 
-#Call weather API and get max temp
+#Call weather API and get daily max temp
 def get_max_temp():
     global f_max
 
     #Get response
     response = requests.get(OWM_Endpoint,params=weather_params).json()
 
-    #Get max temp
-    k_max = response["main"]["temp_max"]
+    #Get max temp for current day
+    k_max = response["daily"][0]["temp"]["max"]
 
     #Convert Kelvin to F
     f_max = round(((k_max - 273.15)*1.8 + 32),)
@@ -98,7 +97,7 @@ hsv = get_color()
 #Make sure port fowarding is enabled for the bulb on your router - try port 9999
 def change_bulb(hsv):
     #IP address of your smart bulb
-    ip_address = "Bulb IP address here"
+    ip_address = "ip address here"
 
     #Create a SmartBulb object with the specified IP address
     bulb = kasa.SmartBulb(ip_address)
@@ -113,20 +112,21 @@ def change_bulb(hsv):
             await bulb.turn_on()
 
     #Color change function
-    async def colorswitch(hsv):
+    async def colorswitch(hsv,brightness):
         await bulb.update()
         hue, saturation, value = hsv
         await bulb.set_hsv(hue, saturation, value)
+        await bulb.set_brightness(brightness)
 
     #Turn on bulb
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(lightswitch())
 
-    #Change color
+    #Change color and set brightness to lowest
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(colorswitch(hsv))
+    loop.run_until_complete(colorswitch(hsv,0))
 
     #Wait 4 hours
     time.sleep(4*60*60)
