@@ -126,7 +126,7 @@ def change_bulb(hsv):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(lightswitch())
 
-    #Change color and set brightness to lowest
+    #Change color and set brightness to low
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(colorswitch(hsv,20))
