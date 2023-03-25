@@ -1,5 +1,7 @@
 """
-This script gets the daily high tempature, converts it to color, and sends it to a Kasa smartbulb to turn on and display in the morning
+This script gets the daily high tempature, converts it to color, and sends it to a Kasa smartbulb to turn on and display in the morning.
+The bulb will repeat the process in the afternoon with tomorrow's high tempature.
+Suggest scheduling daily script run at 8AM local time.
 """
 
 import requests
@@ -10,7 +12,7 @@ import asyncio
 ###GET TEMP AND COLOR##
 
 #Params here
-API_KEY = "API key here"
+API_KEY = "api key here"
 OWM_Endpoint = "https://api.openweathermap.org/data/3.0/onecall"
 LAT = "38.9072"
 LON = "-77.0369"
@@ -41,19 +43,24 @@ weather_params = {
 }
 
 #Call weather API and get daily max temp
-def get_max_temp():
+def get_max_temp(day):
     global f_max
 
     #Get response
     response = requests.get(OWM_Endpoint,params=weather_params).json()
 
     #Get max temp for current day
-    k_max = response["daily"][0]["temp"]["max"]
+    k_max = response["daily"][day]["temp"]["max"]
 
     #Convert Kelvin to F
     f_max = round(((k_max - 273.15)*1.8 + 32),)
 
-    print(f"Max temp will be {f_max} F")
+    if day == 0:
+        day_str = "today"
+    elif day == 1:
+        day_str = "tomorrow"
+
+    print(f"Max temp {day_str} will be {f_max} F")
 
 #Get Color
 def get_color():
@@ -89,10 +96,6 @@ def get_color():
     print(rounded_hsv)
     return rounded_hsv
 
-#Get max temp and convert to color
-get_max_temp()
-hsv = get_color()
-
 ##SEND TO BULB##
 #Make sure port fowarding is enabled for the bulb on your router - try port 9999
 def change_bulb(hsv):
@@ -126,9 +129,9 @@ def change_bulb(hsv):
     #Change color and set brightness to lowest
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(colorswitch(hsv,0))
+    loop.run_until_complete(colorswitch(hsv,20))
 
-    #Wait 4 hours
+    #Keep light on for four hours
     time.sleep(4*60*60)
 
     #Turn off bulb
@@ -136,6 +139,16 @@ def change_bulb(hsv):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(lightswitch())
 
-#Driver
+#Get max temp for today, convert to color, and send to bulb in AM
+get_max_temp(0)
+hsv = get_color()
+change_bulb(hsv)
+
+#Wait 4 hours
+time.sleep(4*60*60)
+
+#Get max temp for tomorrow, convert to color, and send to bulb in PM
+get_max_temp(1)
+hsv = get_color()
 change_bulb(hsv)
 
