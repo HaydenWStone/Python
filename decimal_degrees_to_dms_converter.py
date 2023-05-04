@@ -1,5 +1,5 @@
 """
-This script creates a converter to translate between decimal degrees and degrees/minutes/seconds of latitude and longitude
+This script creates a GUI converter to translate between decimal degrees and degrees/minutes/seconds of latitude and longitude
 """
 
 import tkinter
