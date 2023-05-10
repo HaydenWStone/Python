@@ -8,6 +8,7 @@ import requests
 import kasa
 import time
 import asyncio
+from datetime import datetime
 
 ###GET TEMP AND COLOR##
 
@@ -139,16 +140,27 @@ def change_bulb(hsv):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(lightswitch())
 
-#Get max temp for today, convert to color, and send to bulb in AM
-get_max_temp(0)
-hsv = get_color()
-change_bulb(hsv)
+# Get the current date and time
+now = datetime.now()
 
-#Wait 3:30
-time.sleep(3.5*60*60)
+# Get the day of the week as an integer (Monday is 0, Sunday is 6)
+current_day = now.weekday()
 
-#Get max temp for tomorrow, convert to color, and send to bulb in PM
-get_max_temp(1)
-hsv = get_color()
-change_bulb(hsv)
+# Check if it's Saturday (5) or Sunday (6)
+if current_day == 5 or current_day == 6:
+
+    #Wait until 9:30AM
+    time.sleep(1.5*60*60)
+    #Get max temp for today, convert to color, and send to bulb in AM
+    get_max_temp(0)
+    hsv = get_color()
+    change_bulb(hsv)
+
+#If it is a weekday
+else:
+    #Run immediately at 8AM
+    #Get max temp for today, convert to color, and send to bulb in AM
+    get_max_temp(0)
+    hsv = get_color()
+    change_bulb(hsv)
 
