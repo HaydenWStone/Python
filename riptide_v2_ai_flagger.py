@@ -43,7 +43,7 @@ def riptide():
 #Dedup results and write to a CSV
     # Open a new file in write mode if first run
     if count == 0:
-        with open("output_test.csv", "w", encoding="utf-8") as f:
+        with open("output.csv", "w", encoding="utf-8") as f:
             # Create a CSV writer object
             writer = csv.writer(f)
             # Write the output to the file
@@ -54,8 +54,8 @@ def riptide():
                 writer.writerow([part1, part2])
         # Create a set to store the unique values in the second column
         seen = set()
-        with open('output_test.csv', 'r', encoding='utf-8') as in_file, open('master_test.csv', 'w', encoding='utf-8') as out_file:
-        #with open('output_test.csv', 'r') as in_file, open('master_test.csv', 'a') as out_file:
+        with open('output.csv', 'r', encoding='utf-8') as in_file, open('master.csv', 'w', encoding='utf-8') as out_file:
+        #with open('output.csv', 'r') as in_file, open('master.csv', 'a') as out_file:
             # Create a CSV reader object
             reader = csv.reader(in_file)
             # Create a CSV writer object
@@ -70,7 +70,7 @@ def riptide():
                 writer.writerow(row)
     # Open a new file in append mode if not first run
     elif count != 0:
-        with open("output_test.csv", "a", encoding="utf-8") as f:
+        with open("output.csv", "a", encoding="utf-8") as f:
             # Create a CSV writer object
             writer = csv.writer(f)
             # Write the output to the file
@@ -81,7 +81,7 @@ def riptide():
                 writer.writerow([part1, part2])
         # Create a set to store the unique values in the second column
         seen = set()
-        with open('output_test.csv', 'r') as in_file, open('master_test.csv', 'a') as out_file:
+        with open('output.csv', 'r') as in_file, open('master.csv', 'a') as out_file:
             # Create a CSV reader object
             reader = csv.reader(in_file)
             # Create a CSV writer object
@@ -95,7 +95,7 @@ def riptide():
                 # Write the row to the master CSV file
                 writer.writerow(row)
         #Remove duplicates in master file
-        with open('master_test.csv', 'r') as in_file, open('riptide_test.csv', 'w') as out_file:
+        with open('master.csv', 'r') as in_file, open('riptide.csv', 'w') as out_file:
             seen = set()
             for line in in_file:
                 if line in seen:
@@ -106,7 +106,7 @@ def riptide():
     # Create an empty list to store the deduped tweets
     data = []
     # Open the CSV file for reading
-    with open('riptide_test.csv', 'r') as csvfile:
+    with open('riptide.csv', 'r') as csvfile:
         # Create a CSV reader object
         reader = csv.reader(csvfile)
         # Iterate over the rows in the CSV file
